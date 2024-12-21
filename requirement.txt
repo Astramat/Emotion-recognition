@@ -2,3 +2,6 @@ keras
 tensorflow
 opencv-python
 pillow
+matplotlib
+deepface
+tf-keras
