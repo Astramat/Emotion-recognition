@@ -90,6 +90,3 @@ This release introduces a Python-based emotion recognition system capable of det
 
 - FER2013 dataset: [https://www.kaggle.com/datasets/msambare/fer2013](https://www.kaggle.com/datasets/msambare/fer2013)
 - Community contributions to the pre-trained model.
-
-Thank you for using the Emotion Recognition project. We welcome feedback and contributions!
-
