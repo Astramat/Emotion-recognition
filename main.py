@@ -3,14 +3,16 @@ import numpy as np
 import time
 import os
 import random
+import pygame
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing import image
 from collections import Counter
 from typing import Dict, List
 
+MUSIC = True
+
 def load_gif(directory: str) -> Dict[str, List[np.ndarray]]:
     gif_dict = {emotion: [] for emotion in get_emotion_labels()}
-
     for emotion in gif_dict.keys():
         emotion_folder = os.path.join(directory, emotion)
         if os.path.exists(emotion_folder):
@@ -27,7 +29,6 @@ def load_gif(directory: str) -> Dict[str, List[np.ndarray]]:
                     gif_dict[emotion].append(frames)
     return gif_dict
 
-
 def load_emotion_model(model_path='face_model.weights.h5'):
     return load_model(model_path)
 
@@ -39,6 +40,17 @@ def initialize_face_cascade():
 
 def capture_video():
     return cv2.VideoCapture(0)
+
+def load_music() -> Dict[str, tuple]:
+    music_files = {
+        'Angry': ('musics/happy.mp3', 30),
+        'Disgusted': ('musics/happy.mp3', 30),
+        'Fear': ('musics/happy.mp3', 30),
+        'Happy': ('musics/happy.mp3', 30),
+        'Sad': ('musics/happy.mp3', 30),
+        'Surprise': ('musics/happy.mp3', 30)
+    }
+    return music_files
 
 def process_faces(frame, face_cascade, model, class_names, emotion_window):
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -68,20 +80,29 @@ def display_gif(emotion, gif_dict):
             if cv2.waitKey(100) & 0xFF == ord('q'):
                 break
 
-def display_blue_screen(emotion_window, gif_dict):
+def play_music(emotion, music_files):
+    global MUSIC
+    if not MUSIC:
+        return
+    MUSIC = False
+    file_path, start_pos = music_files.get(emotion, (None, 0))
+    if file_path:
+        pygame.mixer.music.load(file_path)
+        pygame.mixer.music.play(start=0, fade_ms=1000)
+        pygame.mixer.music.set_pos(start_pos)
+
+def display_blue_screen(emotion_window, gif_dict, music_files):
     if emotion_window:
         most_common_emotion = Counter(emotion_window).most_common(1)[0][0]
     else:
-        most_common_emotion = ""
+        most_common_emotion = "Neutral"
 
+    play_music(most_common_emotion, music_files)
     display_gif(most_common_emotion, gif_dict)
-    if not most_common_emotion:
-        blue_screen = np.zeros((480, 640, 3), np.uint8)
-        blue_screen[:] = (255, 0, 0)  # Couleur bleue (en BGR)
-        cv2.putText(blue_screen, f'EMOTION DETECTEE: {most_common_emotion}', (50, 240), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (255, 255, 255), 2)
-        cv2.imshow('Emotion Detection', blue_screen)
 
-def analyze_emotions(face_cascade, model, class_names, emotion_window, gif_dict):
+
+def analyze_emotions(face_cascade, model, class_names, emotion_window, gif_dict, music_files):
+    global MUSIC
     cap = capture_video()
     start_time = time.time()
     cycle_duration = 15  # 5 secondes pour l'analyse, 10 secondes pour l'écran bleu
@@ -94,11 +115,12 @@ def analyze_emotions(face_cascade, model, class_names, emotion_window, gif_dict)
             ret, frame = cap.read()
             process_faces(frame, face_cascade, model, class_names, emotion_window)
         else:
-            display_blue_screen(emotion_window, gif_dict)
+            display_blue_screen(emotion_window, gif_dict, music_files)
 
             if elapsed_time >= cycle_duration:
                 start_time = time.time()
                 emotion_window.clear()
+                MUSIC = True
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
@@ -107,12 +129,14 @@ def analyze_emotions(face_cascade, model, class_names, emotion_window, gif_dict)
     cv2.destroyAllWindows()
 
 def main():
+    pygame.mixer.init()
     model = load_emotion_model()
     class_names = get_emotion_labels()
     face_cascade = initialize_face_cascade()
     emotion_window = []
     gif_dict = load_gif('gifs')
-    analyze_emotions(face_cascade, model, class_names, emotion_window, gif_dict)
+    music_files = load_music()
+    analyze_emotions(face_cascade, model, class_names, emotion_window, gif_dict, music_files)
 
 if __name__ == "__main__":
     main()
