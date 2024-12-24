@@ -1,3 +1,6 @@
+# Release Notes for Emotion Recognition Project
+## Usage
+
 1. Clone the repository:
 
    ```bash
