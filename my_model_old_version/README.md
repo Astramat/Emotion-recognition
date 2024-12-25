@@ -4,7 +4,7 @@
 
 ## Overview
 
-The `my_model_old_version` directory contains a previous version of the emotion recognition model. This model was initially used before the primary, more advanced model (`face_model.weights.h5`) was adopted.
+The `my_model_old_version` directory contains a previous version of the emotion recognition model. This model was initially used before the primary, more advanced model (`emotion_detection_model.h5`) was adopted.
 
 ### Features
 
@@ -70,7 +70,7 @@ my_model_old_version/
 
 ### Known Issues
 
-- The old model (`my_model_old_version`) has lower accuracy compared to the default pre-trained model (`face_model.weights.h5`).
+- The old model (`my_model_old_version`) has lower accuracy compared to the default pre-trained model (`emotion_detection_model.h5`).
 - No mood-specific music playback functionality is available with this version.
 
 ---
